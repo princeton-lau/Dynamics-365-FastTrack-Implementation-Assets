@@ -124,7 +124,6 @@ namespace CDMUtil.Manifest
             logger.LogInformation($"tableList:{JsonConvert.SerializeObject(tableList, Formatting.Indented)}");
 
             ManifestReader manifestHandler = new ManifestReader(adlsContext, localRoot, logger);
-            logger.LogInformation($"manifestHandler:{JsonConvert.SerializeObject(manifestHandler, Formatting.Indented)}");
 
             if (manifestName != "model.json" && manifestName.EndsWith(".manifest.cdm.json") == false)
             {
@@ -135,7 +134,8 @@ namespace CDMUtil.Manifest
             {
                 logger.LogInformation($"manifestName:{manifestName}");
                 CdmManifestDefinition manifest = manifestHandler.cdmCorpus.FetchObjectAsync<CdmManifestDefinition>(manifestName, null, null, true).Result;
-                logger.LogInformation($"manifest:{JsonConvert.SerializeObject(manifest, Formatting.Indented)}");
+                logger.LogInformation($"manifest created");
+
 
                 if (manifest == null)
                 {

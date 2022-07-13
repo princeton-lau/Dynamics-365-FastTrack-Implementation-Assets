@@ -449,7 +449,7 @@ namespace CDMUtil
             string AccessKey = getConfigurationValue(req, "AccessKey", ManifestURL);
 
             string tenantId = getConfigurationValue(req, "TenantId", ManifestURL);
-            string connectionString = getConfigurationValue(req, "SQLEndpoint", ManifestURL);
+            string connectionString = getConfigurationValue(req, "SQLEndPoint", ManifestURL);
             string DDLType = getConfigurationValue(req, "DDLType", ManifestURL);
 
             string targetSparkConnection = getConfigurationValue(req, "TargetSparkConnection", ManifestURL);

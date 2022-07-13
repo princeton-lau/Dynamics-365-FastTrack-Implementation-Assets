@@ -118,6 +118,11 @@ namespace CDMUtil.Manifest
 
             List<string> tableList = c.tableList;
 
+            logger.LogInformation($"adlsContext:{adlsContext}");
+            logger.LogInformation($"manifestName:{manifestName}");
+            logger.LogInformation($"localRoot:{localRoot}");
+            logger.LogInformation($"tableList:{tableList}");
+
             ManifestReader manifestHandler = new ManifestReader(adlsContext, localRoot, logger);
 
             if (manifestName != "model.json" && manifestName.EndsWith(".manifest.cdm.json") == false)

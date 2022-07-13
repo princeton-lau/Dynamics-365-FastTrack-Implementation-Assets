@@ -454,9 +454,6 @@ namespace CDMUtil
 
             string targetSparkConnection = getConfigurationValue(req, "TargetSparkConnection", ManifestURL);
 
-            log.LogInformation($"TenantId={tenantId}");
-            log.LogInformation($"SQLEndpoint={connectionString}");
-
             AppConfigurations AppConfiguration = new AppConfigurations(tenantId, ManifestURL, AccessKey, connectionString, DDLType, targetSparkConnection);
 
             string AXDBConnectionString = getConfigurationValue(req, "AXDBConnectionString", ManifestURL);

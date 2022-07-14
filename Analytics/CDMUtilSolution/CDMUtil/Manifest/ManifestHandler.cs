@@ -1028,7 +1028,10 @@ namespace CDMUtil.Manifest
             eventCallback = new EventCallback();
             cdmCorpus.SetEventCallback(eventCallback, CdmStatusLevel.Warning);
             logger = _logger;
+            logger.LogInformation($"manifestHandler.cs, before mountstorage");
+
             this.mountStorage(adlsContext, currentFolder);
+            logger.LogInformation($"after mountstorage");
         }
 
         private void mountStorage(AdlsContext adlsContext, string localFolder)
@@ -1058,6 +1061,7 @@ namespace CDMUtil.Manifest
             {
                 localFolder = localFolder.Remove(localFolder.Length - 1, 1);
             }
+            logger.LogInformation($"localfolder {localFolder}");
 
             if (adlsContext.MSIAuth == true)
             {
@@ -1082,6 +1086,8 @@ namespace CDMUtil.Manifest
             }
             else if (adlsContext.SharedKey != null)
             {
+                logger.LogInformation($"rootFolder {rootFolder}");
+
                 cdmCorpus.Storage.Mount("adls", new ADLSAdapter(
               adlsContext.StorageAccount, // Hostname.
               rootFolder + localFolder, // Root.

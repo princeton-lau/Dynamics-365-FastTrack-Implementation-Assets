@@ -537,24 +537,23 @@ namespace CDMUtil
 
             return AppConfiguration;
         }
-        [FunctionName("ServiceBusQueueTriggerPL")]
+
+        [FunctionName("ServiceBusQueueTrigger")]
         public static void Run(
             [ServiceBusTrigger("sb-queue-cdmutil-fin-costmgt-predev", Connection = "AzureWebJobsServiceBus")]
-            EventGridEvent serviceBusQueueItem,
+            EventGridEvent eventGridEvent,
+            ExecutionContext context,
             Int32 deliveryCount,
             DateTime enqueuedTimeUtc,
             string messageId,
             ILogger log)
         {
-            log.LogInformation($"C# ServiceBus queue trigger function processed message: {serviceBusQueueItem}");
-            log.LogInformation($"EnqueuedTimeUtc={enqueuedTimeUtc}");
-            log.LogInformation($"DeliveryCount={deliveryCount}");
-            log.LogInformation($"MessageId={messageId}");
 
-            dynamic eventData = serviceBusQueueItem.Data;
+            dynamic eventData = eventGridEvent.Data;
             string ManifestURL = eventData.url;
 
             log.LogInformation($"ManifestURL={ManifestURL}");
+            log.LogInformation($"config1={JsonConvert.SerializeObject(context, Formatting.Indented)}");
 
             if (!ManifestURL.EndsWith(".cdm.json"))
             {
@@ -564,9 +563,7 @@ namespace CDMUtil
             //get configurations data 
             AppConfigurations c = GetAppConfigurationsServiceBusTrigger(null, log, ManifestURL);
 
-            log.LogInformation($"config1={JsonConvert.SerializeObject(c, Formatting.Indented)}");
-
-            log.LogInformation(serviceBusQueueItem.ToString());
+            log.LogInformation(eventGridEvent.Data.ToString());
             // Read Manifest metadata
             log.Log(LogLevel.Information, "Reading Manifest metadata");
             List<SQLMetadata> metadataList = new List<SQLMetadata>();
@@ -578,7 +575,6 @@ namespace CDMUtil
             if (ManifestURL.Contains("/Entities/") == false)
             {
                 ManifestReader.WaitForFolderPathsToExist(c, metadataList, log).Wait();
-                log.Log(LogLevel.Information, "Reading Manifest metadata");
             }
 
             if (!String.IsNullOrEmpty(c.synapseOptions.targetSparkEndpoint))
@@ -588,9 +584,7 @@ namespace CDMUtil
             else
             {
                 SQLHandler.executeSQL(c, metadataList, log);
-                log.Log(LogLevel.Information, "CDMUtil trigger executeSQL");
             }
-            log.Log(LogLevel.Information, "CDMUtil trigger complete");
         }
     }
 }

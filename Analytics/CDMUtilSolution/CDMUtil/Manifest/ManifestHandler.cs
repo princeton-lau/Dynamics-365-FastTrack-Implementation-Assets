@@ -53,10 +53,10 @@ namespace CDMUtil.Manifest
         public async static Task<ManifestDefinitions> getManifestDefinitions(AppConfigurations c, ILogger logger)
         {
             ManifestReader manifestHandler = new ManifestReader(c.AdlsContext, "/", logger);
-            
-            List<string> blobs =  await manifestHandler.cdmCorpus.Storage.FetchAdapter(manifestHandler.cdmCorpus.Storage.DefaultNamespace).FetchAllFilesAsync(c.rootFolder);
 
-           // logger.LogInformation($"{blobs.Count}");
+            List<string> blobs = await manifestHandler.cdmCorpus.Storage.FetchAdapter(manifestHandler.cdmCorpus.Storage.DefaultNamespace).FetchAllFilesAsync(c.rootFolder);
+
+            // logger.LogInformation($"{blobs.Count}");
             List<String> filteredBlob = blobs.Where(b => b.EndsWith(".cdm.json") && !b.EndsWith(".manifest.cdm.json") && !b.Contains("/resolved/")).ToList();
 
             List<String> tableList = c.tableList;
@@ -67,7 +67,7 @@ namespace CDMUtil.Manifest
             {
                 string dataPath = blob.Replace(".cdm.json", "");
                 string[] dataPathParts = dataPath.Split('/');
-                string[] manifestPathParts = dataPathParts.Take(dataPathParts.Length - 1).ToArray();   
+                string[] manifestPathParts = dataPathParts.Take(dataPathParts.Length - 1).ToArray();
                 string TableName = dataPathParts.Last();
 
                 if (tableList != null)
@@ -97,10 +97,10 @@ namespace CDMUtil.Manifest
                                                 {
                                                     ManifestLocation = g.Key.ManifestLocation,
                                                     ManifestName = g.Key.ManifestName,
-                                                    Tables = g.Select(table => new Table{TableName = table.TableName }).ToList()
+                                                    Tables = g.Select(table => new Table { TableName = table.TableName }).ToList()
                                                 }).ToList();
 
-           // logger.LogInformation(JsonConvert.SerializeObject(manifests));
+            // logger.LogInformation(JsonConvert.SerializeObject(manifests));
 
             dynamic adlsConfig = JsonConvert.DeserializeObject(manifestHandler.cdmCorpus.Storage.FetchAdapter(manifestHandler.cdmCorpus.Storage.DefaultNamespace).FetchConfig());
 
@@ -109,19 +109,14 @@ namespace CDMUtil.Manifest
             return mds;
         }
 
-  
-    public async static Task<bool> manifestToSQLMetadata(AppConfigurations c, List<SQLMetadata> metadataList, ILogger logger, string parentFolder = "")
+
+        public async static Task<bool> manifestToSQLMetadata(AppConfigurations c, List<SQLMetadata> metadataList, ILogger logger, string parentFolder = "")
         {
             AdlsContext adlsContext = c.AdlsContext;
             string manifestName = c.manifestName;
             string localRoot = c.rootFolder;
 
             List<string> tableList = c.tableList;
-
-            logger.LogInformation($"adlsContext:{JsonConvert.SerializeObject(adlsContext, Formatting.Indented)}");
-            logger.LogInformation($"manifestName:{manifestName}");
-            logger.LogInformation($"localRoot:{localRoot}");
-            logger.LogInformation($"tableList:{JsonConvert.SerializeObject(tableList, Formatting.Indented)}");
 
             ManifestReader manifestHandler = new ManifestReader(adlsContext, localRoot, logger);
 
@@ -132,10 +127,7 @@ namespace CDMUtil.Manifest
 
             try
             {
-                logger.LogInformation($"manifestName:{manifestName}");
                 CdmManifestDefinition manifest = manifestHandler.cdmCorpus.FetchObjectAsync<CdmManifestDefinition>(manifestName, null, null, true).Result;
-                logger.LogInformation($"manifest created");
-
 
                 if (manifest == null)
                 {
@@ -171,7 +163,7 @@ namespace CDMUtil.Manifest
                         else
                             tableList.Remove(entityName);
                     }
-                    
+
                     var entSelected = manifestHandler.cdmCorpus.FetchObjectAsync<CdmEntityDefinition>(eDef.EntityPath, manifest).Result;
 
                     if (entSelected.ExhibitsTraits.Count() > 1 && entSelected.ExhibitsTraits.Where(x => x.NamedReference == "has.sqlViewDefinition").Count() > 0)
@@ -371,7 +363,7 @@ namespace CDMUtil.Manifest
                 {
                     CdmTraitReference trait = cdmAttribute.AppliedTraits.Where(x => x.NamedReference == "is.dataFormat.numeric.shaped").First() as CdmTraitReference;
 
-                    if (trait != null && trait.Arguments.Count >1)
+                    if (trait != null && trait.Arguments.Count > 1)
                     {
                         columnAttribute.precision = int.Parse(trait.Arguments[0].Value);
                         columnAttribute.scale = int.Parse(trait.Arguments[1].Value);
@@ -381,7 +373,7 @@ namespace CDMUtil.Manifest
                 if (traitsCollection != null && traitsCollection.Where(x => x.NamedReference == "is.constrainedList.wellKnown").Count() > 0)
                 {
                     CdmTraitReference trait = cdmAttribute.AppliedTraits.Where(x => x.NamedReference == "is.constrainedList.wellKnown").First() as CdmTraitReference;
-                    
+
                     if (trait != null && trait.Arguments.Count > 0)
                     {
                         columnAttribute.dataType = "int32";
@@ -396,7 +388,7 @@ namespace CDMUtil.Manifest
                             }
                         }
                     }
-                    
+
                 }
                 columnAttributes.Add(columnAttribute);
             }
@@ -884,12 +876,12 @@ namespace CDMUtil.Manifest
 
                     ManifestDefinitions.Add(md);
                 }
-                List<ManifestDefinition> grouped = ManifestDefinitions.GroupBy(c => new { ManifestLocation = c.ManifestLocation, ManifestName =c.ManifestName })
+                List<ManifestDefinition> grouped = ManifestDefinitions.GroupBy(c => new { ManifestLocation = c.ManifestLocation, ManifestName = c.ManifestName })
                                                  .Select(g => new ManifestDefinition
                                                  {
                                                      ManifestLocation = g.Key.ManifestLocation,
                                                      ManifestName = g.Key.ManifestName,
-                                                     Tables = g.Select(table => new Table { TableName= table.TableName }).ToList()
+                                                     Tables = g.Select(table => new Table { TableName = table.TableName }).ToList()
                                                  }).ToList();
 
                 var mds = new ManifestDefinitions() { Tables = ManifestDefinitions, Manifests = grouped };
@@ -1028,10 +1020,7 @@ namespace CDMUtil.Manifest
             eventCallback = new EventCallback();
             cdmCorpus.SetEventCallback(eventCallback, CdmStatusLevel.Warning);
             logger = _logger;
-            logger.LogInformation($"manifestHandler.cs, before mountstorage");
-
             this.mountStorage(adlsContext, currentFolder);
-            logger.LogInformation($"after mountstorage");
         }
 
         private void mountStorage(AdlsContext adlsContext, string localFolder)
@@ -1061,7 +1050,6 @@ namespace CDMUtil.Manifest
             {
                 localFolder = localFolder.Remove(localFolder.Length - 1, 1);
             }
-            logger.LogInformation($"localfolder {localFolder}");
 
             if (adlsContext.MSIAuth == true)
             {
@@ -1086,8 +1074,6 @@ namespace CDMUtil.Manifest
             }
             else if (adlsContext.SharedKey != null)
             {
-                logger.LogInformation($"rootFolder {rootFolder}");
-
                 cdmCorpus.Storage.Mount("adls", new ADLSAdapter(
               adlsContext.StorageAccount, // Hostname.
               rootFolder + localFolder, // Root.

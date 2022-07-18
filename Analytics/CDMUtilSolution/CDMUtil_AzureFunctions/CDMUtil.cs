@@ -429,115 +429,6 @@ namespace CDMUtil
             return AppConfiguration;
         }
 
-        public static AppConfigurations GetAppConfigurationsServiceBusTrigger(ExecutionContext context, ILogger log, string url)
-        {
-            HttpRequest req = null;
-            string ManifestURL;
-
-            if (url != null)
-            {
-                ManifestURL = url;
-            }
-            else
-            {
-                ManifestURL = getConfigurationValue(req, "ManifestURL");
-            }
-            if (ManifestURL.ToLower().EndsWith("cdm.json") == false && ManifestURL.ToLower().EndsWith("model.json") == false)
-            {
-                throw new Exception($"Invalid manifest URL:{ManifestURL}");
-            }
-            string AccessKey = getConfigurationValue(req, "AccessKey", ManifestURL);
-
-            string tenantId = getConfigurationValue(req, "TenantId", ManifestURL);
-            string connectionString = getConfigurationValue(req, "SQLEndPoint", ManifestURL);
-            string DDLType = getConfigurationValue(req, "DDLType", ManifestURL);
-
-            string targetSparkConnection = getConfigurationValue(req, "TargetSparkConnection", ManifestURL);
-
-            AppConfigurations AppConfiguration = new AppConfigurations(tenantId, ManifestURL, AccessKey, connectionString, DDLType, targetSparkConnection);
-
-            string AXDBConnectionString = getConfigurationValue(req, "AXDBConnectionString", ManifestURL);
-
-
-            if (AppConfiguration.tableList == null)
-            {
-                string TableNames = getConfigurationValue(req, "TableNames", ManifestURL);
-                AppConfiguration.tableList = String.IsNullOrEmpty(TableNames) ? new List<string>() { "*" } : new List<string>(TableNames.Split(','));
-            }
-
-            if (AXDBConnectionString != null)
-                AppConfiguration.AXDBConnectionString = AXDBConnectionString;
-
-            string schema = getConfigurationValue(req, "Schema", ManifestURL);
-            if (schema != null)
-                AppConfiguration.synapseOptions.schema = schema;
-
-            string fileFormat = getConfigurationValue(req, "FileFormat", ManifestURL);
-            if (fileFormat != null)
-                AppConfiguration.synapseOptions.fileFormatName = fileFormat;
-
-            string ParserVersion = getConfigurationValue(req, "ParserVersion", ManifestURL);
-            if (ParserVersion != null)
-                AppConfiguration.synapseOptions.parserVersion = ParserVersion;
-
-            string TranslateEnum = getConfigurationValue(req, "TranslateEnum", ManifestURL);
-            if (TranslateEnum != null)
-                AppConfiguration.synapseOptions.TranslateEnum = bool.Parse(TranslateEnum);
-
-            string DefaultStringLength = getConfigurationValue(req, "DefaultStringLength", ManifestURL);
-
-            if (DefaultStringLength != null)
-            {
-                AppConfiguration.synapseOptions.DefaultStringLength = Int16.Parse(DefaultStringLength);
-            }
-
-            //AppConfiguration.SourceColumnProperties = Path.Combine(context.FunctionAppDirectory, "SourceColumnProperties.json");
-            //AppConfiguration.ReplaceViewSyntax = Path.Combine(context.FunctionAppDirectory, "ReplaceViewSyntax.json");
-
-
-            string ProcessEntities = getConfigurationValue(req, "ProcessEntities", ManifestURL);
-
-            if (ProcessEntities != null)
-            {
-                AppConfiguration.ProcessEntities = bool.Parse(ProcessEntities);
-                //AppConfiguration.ProcessEntitiesFilePath = Path.Combine(context.FunctionAppDirectory, "EntityList.json");
-
-            }
-            string CreateStats = getConfigurationValue(req, "CreateStats", ManifestURL);
-
-            if (CreateStats != null)
-            {
-                AppConfiguration.synapseOptions.createStats = bool.Parse(CreateStats);
-            }
-
-            string ProcessSubTableSuperTables = getConfigurationValue(req, "ProcessSubTableSuperTables", ManifestURL);
-
-            if (ProcessSubTableSuperTables != null)
-            {
-                AppConfiguration.ProcessSubTableSuperTables = bool.Parse(ProcessSubTableSuperTables);
-                //AppConfiguration.ProcessSubTableSuperTablesFilePath = Path.Combine(context.FunctionAppDirectory, "SubTableSuperTableList.json");
-
-            }
-            string ServicePrincipalBasedAuthentication = getConfigurationValue(req, "ServicePrincipalBasedAuthentication", ManifestURL);
-
-            if (ServicePrincipalBasedAuthentication != null)
-            {
-                AppConfiguration.synapseOptions.servicePrincipalBasedAuthentication = bool.Parse(ServicePrincipalBasedAuthentication);
-                if (AppConfiguration.synapseOptions.servicePrincipalBasedAuthentication)
-                {
-                    AppConfiguration.synapseOptions.servicePrincipalTenantId = tenantId;
-                    string servicePrincipalAppId = getConfigurationValue(req, "ServicePrincipalAppId", ManifestURL);
-                    if (servicePrincipalAppId != null)
-                        AppConfiguration.synapseOptions.servicePrincipalAppId = servicePrincipalAppId;
-                    string servicePrincipalSecret = getConfigurationValue(req, "ServicePrincipalSecret", ManifestURL);
-                    if (servicePrincipalSecret != null)
-                        AppConfiguration.synapseOptions.servicePrincipalSecret = servicePrincipalSecret;
-                }
-            }
-
-            return AppConfiguration;
-        }
-
         [FunctionName("ServiceBusQueueTrigger")]
         public static void Run(
             [ServiceBusTrigger("sb-queue-cdmutil-fin-costmgt-predev", Connection = "AzureWebJobsServiceBus")]
@@ -553,7 +444,6 @@ namespace CDMUtil
             string ManifestURL = eventData.url;
 
             log.LogInformation($"ManifestURL={ManifestURL}");
-            log.LogInformation($"config1={JsonConvert.SerializeObject(context, Formatting.Indented)}");
 
             if (!ManifestURL.EndsWith(".cdm.json"))
             {
@@ -561,7 +451,7 @@ namespace CDMUtil
                 return;
             }
             //get configurations data 
-            AppConfigurations c = GetAppConfigurationsServiceBusTrigger(null, log, ManifestURL);
+            AppConfigurations c = GetAppConfigurations(null, context, eventGridEvent);
 
             log.LogInformation(eventGridEvent.Data.ToString());
             // Read Manifest metadata

@@ -439,7 +439,7 @@ namespace CDMUtil
             string messageId,
             ILogger log)
         {
-
+             
             dynamic eventData = eventGridEvent.Data;
             string ManifestURL = eventData.url;
 

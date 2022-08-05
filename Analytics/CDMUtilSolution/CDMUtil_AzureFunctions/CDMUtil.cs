@@ -431,7 +431,7 @@ namespace CDMUtil
 
         [FunctionName("ServiceBusQueueTrigger")]
         public static void Run(
-            [ServiceBusTrigger("sb-queue-cdmutil-fin-costmgt-predev", Connection = "AzureWebJobsServiceBus")]
+            [ServiceBusTrigger("AzureWebJobsServiceBusQueue", Connection = "AzureWebJobsServiceBus")]
             EventGridEvent eventGridEvent,
             ExecutionContext context,
             Int32 deliveryCount,

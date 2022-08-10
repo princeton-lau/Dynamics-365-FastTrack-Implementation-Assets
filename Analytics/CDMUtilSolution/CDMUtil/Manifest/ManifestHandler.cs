@@ -7,7 +7,6 @@ using Microsoft.CommonDataModel.ObjectModel.Enums;
 using Microsoft.CommonDataModel.ObjectModel.Storage;
 using System.Collections.Generic;
 using System.Linq;
-using CDMUtil.Context.ADLS;
 using CDMUtil.Context.ObjectDefinitions;
 using System.Text.RegularExpressions;
 using CDMUtil.SQL;
@@ -177,7 +176,7 @@ namespace CDMUtil.Manifest
                             string viewDefinition = cdmTrait.Arguments.First().Value;
                             //update view dependencies
                             updateViewDependencies(entityName, viewDefinition, metadataList, c, logger);
-                            TSqlSyntaxHandler.updateViewSyntax(c, metadataList);
+                            TSqlSyntaxHandler.updateViewSyntax(c, metadataList, logger);
                         }
                     }
                     else
@@ -252,7 +251,7 @@ namespace CDMUtil.Manifest
             // at the end update the view syntax
             if (updateViewSyntax)
             {
-                TSqlSyntaxHandler.updateViewSyntax(c, metadataList);
+                TSqlSyntaxHandler.updateViewSyntax(c, metadataList, logger);
             }
 
             return true;

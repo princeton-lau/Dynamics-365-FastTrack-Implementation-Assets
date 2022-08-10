@@ -1,11 +1,35 @@
+parameters:
+- name: environmentSelector
+  displayName: environment Selector
+  type: string
+  default: arm-fin-costmgt-predev # starting with arm-
+  values:
+  - arm-fin-costmgt-predev
+  - arm-fin-costmgt-dev
+  - arm-fin-costmgt-qa
+  - arm-fin-costmgt-uat
+  - arm-fin-costmgt-prod
+
+- name: appNameSelector
+  displayName: appName Selector
+  type: string
+  default: cdmutil-fin-costmgt-predev # starting with arm-
+  values:
+  - cdmutil-fin-costmgt-predev
+  - cdmutil-fin-costmgt-dev
+  - cdmutil-fin-costmgt-qa
+  - cdmutil-fin-costmgt-uat
+  - cdmutil-fin-costmgt-prod
+
 trigger:
 - main
 - master
 
 variables:
   # Azure service connection established during pipeline creation
-  azureSubscription: 'arm-fin-costmgt-predev'
-  appName: 'cdmutil-fin-costmgt-predev'
+  # azureSubscription: 'arm-fin-costmgt-predev'
+  azureSubscription: ${{parameters.environmentSelector}}
+  appName: ${{parameters.appNameSelector}}
   appType: 'functionApp'
   # Agent VM image name
   vmImageName: 'windows-latest'
